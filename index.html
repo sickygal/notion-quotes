@@ -7,8 +7,12 @@
     <title>Notion Random Quote</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400&family=Roboto+Mono:wght@300;400&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <style>
+        html, body {
+            overflow: hidden;
+            height: 100%;
+        }
+
         body {
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,46 +20,47 @@
             margin: 0;
             padding: 0;
         }
-        
+
         .card {
             width: 80%;
             max-width: 700px;
         }
-        
+
         .card-body {
             padding: 20px;
         }
-        
+
         .quote {
             font-size: 1.5rem;
+            text-align: center;
         }
-        
+
         .content {
             font-weight: 200;
         }
-        
+
         cite {
             font-size: 80%;
             font-weight: 500;
             font-style: normal;
         }
+
         .EB Garamond {
-          font-family: 'EB Garamond', serif2;
+            font-family: 'EB Garamond', serif2;
         }
-      
-        
+
         .mono {
             font-family: 'Roboto Mono', monospace;
         }
-        
+
         .sans {
             font-family: 'Roboto', sans-serif;
         }
-        
+
         .serif {
             font-family: 'Noto Serif JP', serif;
         }
-        
+
         .settings {
             text-align: center;
             border-color: 1px;
@@ -66,11 +71,11 @@
             opacity: 0;
             transition: opacity 0.2s;
         }
-        
+
         .settings:hover {
             opacity: 1;
         }
-        
+
         .settings button {
             border: none;
             background: none;
@@ -78,48 +83,49 @@
             cursor: pointer;
             transition: opacity 0.2s;
         }
-        
+
         .settings button:hover {
             opacity: 0.6;
         }
-        
-        .settings .modes button {
+
+        .settings .modes button,
+        .settings .alignments button {
             font-size: 0.8rem;
         }
-        
+
         .settings .action {
             padding: 0.4rem;
         }
-        
+
         .settings .size button {
             font-size: 1rem;
         }
-        
+
         .settings .fonts button {
             font-size: 1.2rem;
             display: inline-block;
             text-align: center;
         }
-        
+
         .settings small {
             font-size: 0.8rem;
             float: left;
         }
-        
+
         .light {
             color: rgba(0, 0, 0, 0.9);
             background-color: #ffffff !important;
         }
-        
+
         .dark {
             color: rgba(255, 255, 255, 0.9);
             background-color: rgb(25, 25, 25) !important;
         }
-        
+
         .dash {
             opacity: 0.2;
         }
-        
+
         hr {
             border: none;
             border-bottom: 1px solid gray;
@@ -145,6 +151,11 @@
             <button class="light">Light</button>
             <button class="dark">Dark</button>
         </div>
+        <div class="alignments sans">
+            <button class="left">Left</button>
+            <button class="center">Center</button>
+            <button class="right">Right</button>
+        </div>
         <div class="fonts">
             <button class="sans">
                 ag <br>
@@ -154,11 +165,11 @@
                 ag <br>
                 <small class="sans">Serif</small>
             </button>
-             <button class="serif2">
+            <button class="serif2">
                 ag <br>
                 <small class="sans">Serif2</small>
             </button>
-          <button class="mono">
+            <button class="mono">
                 ag <br>
                 <small class="sans">Mono</small>
             </button>
@@ -183,6 +194,7 @@
             const fonts_buttons = document.querySelectorAll(".settings .fonts button");
             const modes_buttons = document.querySelectorAll(".settings .modes button");
             const size_buttons = document.querySelectorAll(".settings .size button");
+            const align_buttons = document.querySelectorAll(".settings .alignments button");
             const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 
             async function updateQuote() {
@@ -201,13 +213,13 @@
                     quote_text.textContent = "Oops! There is a problem with the quotes server.";
                     console.log(error);
                 }
-
             }
+
             async function updateQuoteCustom(f) {
                 const response = await fetch(f);
                 const data = await response.json();
                 if (response.ok && data.length > 0) {
-                    random_quote = data[Math.floor(Math.random() * data.length - 1) + 1];
+                    const random_quote = data[Math.floor(Math.random() * data.length)];
                     quote_text.textContent = random_quote.content;
                     cite.textContent = random_quote.author;
                 } else {
@@ -225,6 +237,9 @@
 
                 size = parseFloat(localStorage.getItem('size'), 2) || 1.5;
                 setSize(size);
+
+                const align = localStorage.getItem('align') || 'center';
+                changeAlignment(align);
             }
 
             function changeFont(value) {
@@ -248,6 +263,11 @@
                 localStorage.setItem('size', value);
             }
 
+            function changeAlignment(value) {
+                quote.style.textAlign = value;
+                localStorage.setItem('align', value);
+            }
+
             function loadQuote() {
                 var url = new URL(window.location);
                 var fileUrl = url.searchParams.get("f");
@@ -264,16 +284,20 @@
                 }
             }
 
-            size_buttons.forEach(function(elem) {
+            size_buttons.forEach(elem => {
                 elem.addEventListener("click", () => changeSize(elem.classList.value));
             });
 
-            fonts_buttons.forEach(function(elem) {
+            fonts_buttons.forEach(elem => {
                 elem.addEventListener("click", () => changeFont(elem.classList.value));
             });
 
-            modes_buttons.forEach(function(elem) {
+            modes_buttons.forEach(elem => {
                 elem.addEventListener("click", () => changeMode(elem.classList.value));
+            });
+
+            align_buttons.forEach(elem => {
+                elem.addEventListener("click", () => changeAlignment(elem.classList.value));
             });
 
             shuffle.addEventListener("click", () => loadQuote());
@@ -282,7 +306,6 @@
             updateStyle();
             loadQuote();
             handleColorSchemeChange(prefersDark);
-
         });
     </script>
 </body>
